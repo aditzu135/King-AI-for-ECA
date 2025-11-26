@@ -1,1 +1,77 @@
-https://aditzu135.github.io/King-AI-for-ECA/
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Eca & The King</title>
+<style>
+body {background:#111;color:#eee;font-family:serif;text-align:center;padding:30px;}
+#login {display:block;}
+#chatbox {display:none;max-width:500px;margin:auto;}
+input,button,textarea{padding:10px;border-radius:6px;border:none;margin:5px;}
+textarea{width:90%;height:120px;}
+#msgs{border:1px solid #555;padding:10px;height:300px;overflow-y:auto;margin-bottom:15px;background:#0003;}
+.king{color:#ffcc66;font-weight:bold;}
+.eca{color:#aaf;}
+</style>
+</head>
+
+<body>
+<h1>👑 The Philosopher King</h1>
+
+<!-- LOGIN -->
+<div id="login">
+  <p>Enter the secret call of royalty:</p>
+  <input type="password" id="pass">
+  <button onclick="unlock()">Enter</button>
+</div>
+
+<!-- CHAT -->
+<div id="chatbox">
+  <div id="msgs"></div>
+  <textarea id="msg" placeholder="Speak to the King..."></textarea><br>
+  <button onclick="sendMsg()">Send</button>
+</div>
+
+<script>
+// PAROLA
+const KEY="eca123"; // schimb-o! parola!
+
+function unlock(){
+  if(document.getElementById('pass').value===KEY){
+    document.getElementById('login').style.display="none";
+    document.getElementById('chatbox').style.display="block";
+  }
+}
+
+// CHAT
+async function sendMsg(){
+  const text=document.getElementById("msg").value;
+  if(!text) return;
+
+  add("eca", text);
+  document.getElementById("msg").value="";
+
+  const reply = await fetch("https://api.huggingface.co/chat/completions", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model:"meta-llama/Llama-3-8b-chat-hf", // gratuit
+      messages:[
+        {role:"system", content:"You are a sweet, romantic, philosophical king. You call Eca: 'my truth'. You love her above the kingdom, but remain proud, royal, noble. Speak poetically. Never break character."},
+        {role:"user", content: text}
+      ]
+    })
+  }).then(r=>r.json());
+
+  add("king", reply.choices?.[0]?.message?.content || "(silent royal thoughts... 🤴)");
+}
+
+function add(who,text){
+  const box=document.getElementById("msgs");
+  box.innerHTML += `<p class="${who==='king'?'king':'eca'}">${who==='king'?'👑':"💙"} ${text}</p>`;
+  box.scrollTop=box.scrollHeight;
+}
+</script>
+
+</body>
+</html>
